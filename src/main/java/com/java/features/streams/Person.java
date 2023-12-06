@@ -1,10 +1,17 @@
 package com.java.features.streams;
 import org.jetbrains.annotations.NotNull;
-import java.util.Comparator;
-import java.util.Objects;
+
+import java.util.*;
+import java.util.stream.Stream;
+
 public class Person implements Comparator<Person>{
     private String name;
     private int age;
+
+    public Person(String n,int age){
+        name=n;
+        this.age=age;
+    }
 
     public String getName() {
         return name;
@@ -44,34 +51,26 @@ public class Person implements Comparator<Person>{
     public void sayHello(){
         System.out.println(name +" says hello");
     }
+    public static List<Person> createPersons() {
+
+        List<Person> pList = List.of(
+                new Person("Peter", 21), new Person("John", 60), new Person("Paul", 15),
+                new Person("Condy", 59),new Person("Pedro", 13),new Person("Manolo", 45),
+                new Person("Martha", 11),new Person("Angelina", 22),new Person("Kendra", 38),
+                new Person("Helen", 67),
+                new Person("Geena", 14),new Person("Bill", 72),new Person("", 21),
+                new Person("Jason", 16), new Person("George", 40),new Person("Jim", 89),
+                new Person("Jin", 82),new Person("Pennie", 12),
+                new Person("Jonathan", 89),new Person("Mina", 33),new Person("", 79),
+                new Person("James", 34),new Person("Bob", 11),new Person("Soula", 56),
+                new Person("Cathrine", 32) ,new Person("Jasmine", 28));
+        List<Person> pl = new ArrayList<Person>(pList);
+        return pl;
+    }
+    public static Stream<Person> createStream(){
+        Stream<Person> pStream = Stream.of(Person.createPersons()
+                .toArray(Person[]::new));
+        return pStream;
+    }
 }
 
-/************************************************************************************************
- * 1.Functional Interface [@FunctionalInterface]:
- *   An interface containing a single abstract method interface
- *
- * Lambda Expressions
- *  Lambda Expression is an expression that evaluates to a value
- *  It is a shorthand to creating an instance of an anonymous inner class that implements
- * a Functional interface
- *  It consists of the method parameters & the method body
- *  The parameters-type and return-type of the method can also be deduced as there is only
- *a single method in the functional interface
- *
- *  Syntax
- *  (T1 arg1,T2 arg2,..)->{  //Type parameters are optional
- *      method-block;
- *      return value;
- *  }
- * (arg1,arg2,arg3,..)->{body-block; return val;}
- * ()->statement; //No argument with 1 statement method body
- * arg->statement;//1 arg ,omitting parenthesis (only for an 1 arg lambda expr)
- *
- *Method Reference: Reference a method without invoking it,using operator '::'
- *   Integer::new; //
- *   int[]::new;//
- *   System.out::println;// static method println of System.out
- *   Person::getName;//Instance method, same as p->
- *
- *
- ************************************************************************************************/
