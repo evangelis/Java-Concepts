@@ -365,6 +365,6 @@ abstract class ByteBuffer extends Buffer
   abstract XXXBuffer asXXXBuffer() // xxx={char,short,int,long,float,double}
   abstract ByteBuffer asReadOnlyBuffer() ,duplicate()
   final byte[] array()
-  
+    
 
     

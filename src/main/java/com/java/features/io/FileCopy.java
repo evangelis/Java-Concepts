@@ -6,8 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
-import kotlin.text.Charsets;
 import org.apache.commons.math3.stat.inference.OneWayAnova;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -73,11 +74,11 @@ public class FileCopy {
             while((bytesRead = fin.read())!=-1){
                 fout.write(byteBuff,0,bytesRead);
             }
-            elapsedTime = System.nanoTime() -startTime;
-            System.out.println();
+            elapsedTime = (long)((System.nanoTime() -startTime)/1000000.0);
+            System.out.println("Elapsed time is :"+elapsedTime+" msec");
         }
         catch (IOException ex){
-            logger.error("Error in copying files %s",ex.getMessage());
+            logger.error("Error in copying files %s",ex);
         }
 
     }
@@ -200,7 +201,81 @@ public class FileCopy {
         catch (IOException ex){
             logger.error("Error copying file",ex);
         }
+    }
+    public static void channelsIndirect(){
+        String fnameOut = "/home/vangelis/Desktop/Java-Concepts/src/main/resources";
+        long startTime ,elapsedTime;
+        int bufferSize = 1024*4;
+        Path file =Paths.get(fnameIn);
+        System.out.printf("Copying file %s using file channel with indirect byte buffer " +
+                        "of buffer size %d bytes",
+                file.getFileName(),bufferSize);
+        try(FileChannel fcIn = new FileInputStream(fnameIn).getChannel();
+            FileChannel fcOut = new FileOutputStream(fnameOut).getChannel()){
+            ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+            startTime =System.nanoTime();
+            int bytesRead;
+            while ((bytesRead = fcIn.read(bb))>0){
+                bb.flip();
+                fcOut.write(bb);
+                bb.clear();
+            }
+            elapsedTime = (long)((System.nanoTime() - startTime)/1000000.00);
+            System.out.println("Elapsed time : "+elapsedTime +" msec");
+        }
+        catch (IOException ex){
+            logger.error("Error copying file",ex);
+        }
+    }
+    public static void channelsDirect(){
+        String fnameOut = "/home/vangelis/Desktop/Java-Concepts/src/main/resources";
+        long startTime ,elapsedTime;
+        int bufferSize = 1024*4;
+        File file =new File(fnameIn);
+        System.out.printf("Copying file %s using file channel with a direct byte buffer" +
+                "of size %d ",file.getName(), bufferSize);
+        try(FileChannel fcIn  = new FileInputStream(fnameIn).getChannel();
+            FileChannel fcOut = new FileOutputStream(fnameOut).getChannel()){
+            ByteBuffer bb = ByteBuffer.allocateDirect(bufferSize);
+            startTime = System.nanoTime();
+            int bytesCount;
+            while ((bytesCount = fcIn.read(bb))>0){
+                bb.flip();
+                fcOut.write(bb);
+                bb.clear();
+            }
+            elapsedTime = (long)((System.nanoTime() -startTime)/1000000.00);
+            System.out.printf("Elapsed time is : %d msec",elapsedTime);
 
+        }
+        catch (IOException ex){
+            logger.error("Error copying the file",ex);
+        }
+    }
+    public static void channelsTransfer(){
+        File ferr = new File("~/Desktop/Java-Concepts/src/main/java/resources/");
+
+        String fnameOut = "/home/vangelis/Desktop/Java-Concepts/src/main/resources";
+        long startTime ,elapsedTime;
+        int bufferSize = 1024*4;
+        Path file =Paths.get(fnameIn);
+        System.out.printf("Copying file %s with a file channel with a " +
+                "ByteBuffer of size %d using transferTo(long pos,long count,WritableByteChannel)",
+                file.getFileName(),bufferSize);
+        try(FileChannel fcIn = new FileInputStream(fnameIn).getChannel();
+            FileChannel fcOut = new FileOutputStream(fnameOut).getChannel();
+            PrintStream psErr = new PrintStream(ferr)){
+
+            System.setErr(psErr);
+            ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
+            startTime = System.nanoTime();
+            fcIn.transferTo(0,fcIn.size(),fcOut);
+            elapsedTime = (long) ((System.nanoTime() -startTime)/1000000.0);
+            System.out.println("Elapsed time is :"+elapsedTime +" msec");
+        }catch (IOException ex){
+            System.err.println("Error copying the file "+ex.getMessage());
+        }
 
     }
+
 }
